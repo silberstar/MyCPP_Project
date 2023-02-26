@@ -35,6 +35,16 @@ private:
 	void OnVerticalLook(	float InAxis);
 	void OnZoom(			float InAxis);
 
+	void OnJump();
+	void OnCrouch();
+	void OnEvade();
+	void OnAction();
+	void OnSkill_01();
+	void OnSkill_02();
+	void OnSkill_03();
+	void OnSkill_04();
+	void OnSkill_05();
+
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

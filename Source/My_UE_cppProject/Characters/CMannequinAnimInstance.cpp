@@ -1,6 +1,7 @@
 #include "CMannequinAnimInstance.h"
 #include "Global.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 void UCMannequinAnimInstance::NativeBeginPlay()
 {
@@ -19,4 +20,7 @@ void UCMannequinAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	Speed = character->GetVelocity().Size2D();
 	Direction = CalculateDirection(character->GetVelocity(), character->GetControlRotation());
+	bIsFalling = character->GetCharacterMovement()->IsFalling();
+	//bIsCrouching = character->bIsCrouched;
+	bIsCrouching = character->GetCharacterMovement()->IsCrouching();
 }

@@ -16,6 +16,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 		float Direction;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		bool bIsFalling;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+		bool bIsCrouching;
+
 public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;

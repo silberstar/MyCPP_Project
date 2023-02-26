@@ -106,6 +106,44 @@ void ACPlayer::OnZoom(float InAxis)
 	SpringArm->TargetArmLength = FMath::Clamp(SpringArm->TargetArmLength, Option->GetZoomRange().X, Option->GetZoomRange().Y);
 }
 
+void ACPlayer::OnJump()
+{
+	Jump();
+}
+
+void ACPlayer::OnCrouch()
+{
+	Crouch();
+}
+
+void ACPlayer::OnEvade()
+{
+}
+
+void ACPlayer::OnAction()
+{
+}
+
+void ACPlayer::OnSkill_01()
+{
+}
+
+void ACPlayer::OnSkill_02()
+{
+}
+
+void ACPlayer::OnSkill_03()
+{
+}
+
+void ACPlayer::OnSkill_04()
+{
+}
+
+void ACPlayer::OnSkill_05()
+{
+}
+
 void ACPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -121,4 +159,7 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("HorizontalLook", this, &ACPlayer::OnHorizontalLook	);
 	PlayerInputComponent->BindAxis("VerticalLook",	 this, &ACPlayer::OnVerticalLook	);
 	PlayerInputComponent->BindAxis("Zoom",			 this, &ACPlayer::OnZoom			);
+
+	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACPlayer::OnJump);
+	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &ACPlayer::OnCrouch);
 }
