@@ -5,7 +5,9 @@
 #include "GameFrameWork/CharacterMovementComponent.h"
 
 #include "Components/CStatusComponent.h"
+#include "Components/CStateComponent.h"
 #include "Components/COptionComponent.h"
+#include "Components/CMontageComponent.h"
 
 #include "Camera/CameraComponent.h"
 
@@ -22,7 +24,9 @@ ACPlayer::ACPlayer()
 
 	//Create ActorComponent
 	CHelpers::CreateActorComponent(this, &Status, "Status");
+	CHelpers::CreateActorComponent(this, &State, "State");
 	CHelpers::CreateActorComponent(this, &Option, "Option");
+	CHelpers::CreateActorComponent(this, &Montage, "Montages");
 
 	//ComponentSetting
 	GetMesh()->SetRelativeLocation(FVector	(0, 0, -88));
@@ -37,11 +41,21 @@ ACPlayer::ACPlayer()
 	GetMesh()->SetAnimInstanceClass(animInstanceClass);
 
 	SpringArm->SetRelativeLocation(FVector	(0, 0, 140));
-	SpringArm->SetRelativeRotation(FRotator	(0, 90, 0));
+	SpringArm->SetRelativeRotation(FRotator	(0, 0, 0));
+	SpringArm->SocketOffset.Z = 140;
 	SpringArm->TargetArmLength = 200.0f;
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->bUsePawnControlRotation = true;
 	SpringArm->bEnableCameraLag = true;
+
+	Camera->SetRelativeRotation(FRotator(-45, 0, 0));
+
+
+	//MovementSetting
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->MaxWalkSpeed = Status->GetRunSpeed();
+	GetCharacterMovement()->RotationRate = FRotator(0, 720, 0);
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 }
 
@@ -62,11 +76,8 @@ void ACPlayer::BeginPlay()
 	GetMesh()->SetMaterial(0, BodyMaterial);
 	GetMesh()->SetMaterial(1, LogoMaterial);
 
-	//MovementSetting
-	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->MaxWalkSpeed = Status->GetRunSpeed();
-	GetCharacterMovement()->RotationRate = FRotator(0, 720, 0);
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	State->OnStateTypeChanged.AddDynamic(this, &ACPlayer::OnStateTypeChanged);
+
 }
 
 void ACPlayer::OnMoveForward(float InAxis)
@@ -103,6 +114,7 @@ void ACPlayer::OnVerticalLook(float InAxis)
 void ACPlayer::OnZoom(float InAxis)
 {
 	SpringArm->TargetArmLength += Option->GetZoomSpeed() * InAxis * GetWorld()->GetDeltaSeconds();
+	SpringArm->SocketOffset.Z += Option->GetZoomSpeed() * InAxis * GetWorld()->GetDeltaSeconds();
 	SpringArm->TargetArmLength = FMath::Clamp(SpringArm->TargetArmLength, Option->GetZoomRange().X, Option->GetZoomRange().Y);
 }
 
@@ -118,6 +130,12 @@ void ACPlayer::OnCrouch()
 
 void ACPlayer::OnEvade()
 {
+	CheckFalse(State->IsIdleMode());
+	CheckFalse(Status->IsCanMove());
+
+	//CLog::Print("Roll");
+
+	State->SetRollMode();
 }
 
 void ACPlayer::OnAction()
@@ -144,6 +162,14 @@ void ACPlayer::OnSkill_05()
 {
 }
 
+void ACPlayer::OnStateTypeChanged(EStateType InPrevType, EStateType InNewType)
+{
+	switch (InNewType)
+	{
+	case EStateType::Roll:		Begin_Roll();		break;
+	}
+}
+
 void ACPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -162,4 +188,23 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACPlayer::OnJump);
 	PlayerInputComponent->BindAction("Crouch", EInputEvent::IE_Pressed, this, &ACPlayer::OnCrouch);
+	PlayerInputComponent->BindAction("Roll", EInputEvent::IE_Pressed, this, &ACPlayer::OnEvade);
 }
+
+void ACPlayer::Begin_Roll()
+{
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	FVector start = GetActorLocation();
+	FVector target = start + GetVelocity().GetSafeNormal2D();
+	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(start, target));
+
+	Montage->PlayRoll();
+}
+
+void ACPlayer::End_Roll()
+{
+	State->SetIdleMode();
+}
+

@@ -11,7 +11,9 @@ public class My_UE_cppProject : ModuleRules
 			"Core",
 			"CoreUObject", 
 			"Engine",
-			"InputCore"
+			"InputCore",
+			"AIModule",
+			"GameplayTasks"
 
 		});
 

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "CCharacter.h"
+#include "Components/CStateComponent.h"
 #include "CPlayer.generated.h"
 
 UCLASS()
@@ -25,6 +26,12 @@ private://액터 컴포넌트
 	UPROPERTY(VisibleDefaultsOnly)
 		class UCOptionComponent* Option;
 
+	UPROPERTY(VisibleDefaultsOnly)
+		class UCStateComponent* State;
+
+	UPROPERTY(VisibleDefaultsOnly)
+		class UCMontageComponent* Montage;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -45,9 +52,15 @@ private:
 	void OnSkill_04();
 	void OnSkill_05();
 
+	UFUNCTION()
+		void OnStateTypeChanged(EStateType InPrevType, EStateType InNewType);
+
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void Begin_Roll();
+	void End_Roll();
 
 private:
 	class UMaterialInstanceDynamic* BodyMaterial;
